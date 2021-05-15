@@ -61,6 +61,7 @@ class database:
         self.connection.close()
 
 class Email:
+    
     def __init__(self, email, password, sendToEmail, subject):
         self.email = email
         self.password = password
