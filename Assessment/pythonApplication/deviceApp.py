@@ -22,8 +22,8 @@ def startup():
     while True:
         readVitals()
 
-def getSerial(): # Gets the device serial number for later use
-    cpuserial = "0000000000000000"
+def getSerial():
+    cpuserial = "0000000000000000" # Gets the device serial number for later use
     try:
         file = open('/proc/cpuinfo', 'r') # File where serial number is stored
         for line in file:
@@ -39,16 +39,19 @@ def readVitals():
     global emergencyToggle
     global db
 
+    # Gets all the returned values and stores them locally
     deviceID = getSerial()
     heartVal = heartSensor.ReturnValue(1)
     accel = accelerometer.ReturnValue()
     tempVal = tempSensor.ReturnValue(0)
 
+    # Adds the collected data to the database
     query = "INSERT INTO deviceInformation (deviceID, heartRate, acceleration, temperature) VALUES (%s, %s, %s, %s)"
     values = (deviceID, heartVal, accel, tempVal)
     db.ImportData(query, values)
     db.Commit()
 
+    # Fall detection with accelerometer value
     if emergencyToggle == False:
         if (accel >= 2.5): alert()
 
@@ -71,7 +74,8 @@ def alert(): # Code for button to cancel fall warning
             led.Off()
             toggle = False
 
-        if (inputValue == False): # Checks if button is pressed
+        # Checks if button is pressed
+        if (inputValue == False): 
             print("Button Pressed")
             break # Breaks from loop
         
@@ -80,9 +84,11 @@ def alert(): # Code for button to cancel fall warning
         cycle -= 1
         time.sleep(0.5)
     
-    if not (cycle >= 0): # If the cycle is finished trigger alert
+    # If the cycle is finished trigger alert
+    if not (cycle >= 0):
         emergencyNotification()
-        led.SetColor(True, False, False) # Sets LED to red
+        # Sets LED to red
+        led.SetColor(True, False, False) 
     else:
         led.Off() # Turns off LED
         print("Warning Timer Stopped")
@@ -91,12 +97,15 @@ def emergencyNotification():
     global emergencyToggle
     global db
 
+    # Stops the loop in data collection function
     emergencyToggle = True
     print("Sending information to emergency services...")
    
     deviceID = getSerial() # Saves CPU serial number
+    # Gets the patients details to correctly send the email
     query = "SELECT * FROM patientData WHERE deviceID = '%s'" % (deviceID)
     records = db.ReturnData(query)
+    # Save patients first name, last name and email address
     for row in records:
         firstName = row[3]
         lastName = row[4]
@@ -105,8 +114,11 @@ def emergencyNotification():
     camera = Camera() # Defines the Camera from class
     camera.Record(15) # Sets the camera to record for 15 seconds
 
+    # Connects to the email server using the server account details, address to send to and email subject
     email = Email("sheldoncollegeiot@gmail.com", "P@ssword#1", emailAddress, "Emergency Alert Notification")
+    # Attaches a standard message with the patients name returned from the databse
     email.AttachText(f"An emergency alert has been triggered on a device attached to this email address\n\nFirst Name - {firstName}\nLast Name - {lastName}")
+    # Attaches the video recorded from the device camera
     email.AttachFile("cameraCapture.mp4")
     email.SendEmail()
 

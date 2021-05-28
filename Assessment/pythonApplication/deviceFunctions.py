@@ -114,7 +114,8 @@ class Camera:
         self.fourcc = cv2.VideoWriter_fourcc(*'XVID')
         self.out = cv2.VideoWriter("cameraCapture.mp4", self.fourcc, 24, (1280, 720))
 
-    def Record(self, recordTime): # Starts recording from the camera based on a certain time passed when the functions is called
+    # Starts recording from the camera based on a certain time passed when the functions is called
+    def Record(self, recordTime):
         tick = 0 # Local cycle variable
 
         while tick < recordTime * 100: # Adds a buffer to the local cycle and record time
@@ -182,12 +183,16 @@ class GPIODevices:
             self.mcp = Adafruit_MCP3008.MCP3008(spi=SPI.SpiDev(self.SPI_PORT, self.SPI_DEV))
 
         def ReturnValue(self, analogPort):
-            raw = self.mcp.read_adc(analogPort) # Reads value from converter port
-            temp = ((raw * 330)/float(1023))-50 # Multiplies 1023 value by the voltage to find actual temp
-            temp = round(temp, 2) # Rounds temp to 2 decimal places
+            # Reads value from converter port
+            raw = self.mcp.read_adc(analogPort)
+            # Multiplies 1023 value by the voltage to find actual temp
+            temp = ((raw * 330)/float(1023))-50
+            # Rounds temp to 2 decimal places
+            temp = round(temp, 2)
 
             print(f'Temperature: {temp}')
-            return temp # Returns value to where the function is called
+            # Returns value to where the function is called
+            return temp
 
     class HeartSensor:
         def __init__(self): # Sets up the sensor with the Digital to Analog converter
