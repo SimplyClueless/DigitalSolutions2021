@@ -1,5 +1,5 @@
 <?php
-function OpenConnection()
+function openConnection()
 {
     $dbhost = "35.116.119.134";
     $dbuser = "root";
@@ -11,7 +11,12 @@ function OpenConnection()
     return $connection;
 }
 
-function CloseConnection($connection)
+function APIDataReturn($queryStart, $queryEnd)
+{
+
+}
+
+function closeConnection($connection)
 {
     $connection->close();
 }    

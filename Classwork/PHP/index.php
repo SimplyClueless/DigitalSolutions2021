@@ -32,12 +32,15 @@
 <?php
 include "config.php";
 
-$connection = OpenConnection();
-if ($connection)
-{
-    echo "Connected Successfully";
-}
-CloseConnection($connection);
+#$connection = openConnection();
+
+APIDataReturn("SELECT * FROM", "WHERE title LIKE 'jones'");
+echo "<br>";
+echo "<br>";
+echo "--------------------";
+echo "<br>";
+
+#closeConnection($connection);
 ?>
 
 </html>
