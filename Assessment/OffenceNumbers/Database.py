@@ -45,7 +45,7 @@ class DatabaseManager:
 
         userDetails = (firstName, lastName, emailAddress, encryptedPassword)
         try:
-            self.cursor.execute(f"""INSERT INTO civilianUsers (firstName, lastName, emailAddress, password) 
+            self.cursor.execute("""INSERT INTO civilianUsers (firstName, lastName, emailAddress, password) 
             VALUES (?, ?, ?, ?)""", userDetails)
         except:
             return False
@@ -58,8 +58,16 @@ class DatabaseManager:
         # Encrypt password before registering user
         pass
 
-    def ReturnData(self):
-        return self.cursor.execute("SELECT * FROM districtReportedOffencesNumber")
+    def ReturnData(self, district):
+        if district == "All":
+            return self.cursor.execute("SELECT * FROM districtReportedOffencesNumber")
+        else:
+            return self.cursor.execute(f"SELECT * FROM districtReportedOffencesNumber WHERE District = '{district}'")
+
+    def ImportCrime(self, district, monthYear, persons, property, other):
+        importValues = (district, monthYear, persons, property, other)
+        self.cursor.execute("""INSERT INTO districtReportedOffencesNumber (District, Month Year, Offences Against the Person, Offences AgainstProperty, Other Offences) 
+        VALUES (?, ?, ?, ?, ?)""", importValues)
 
     def Commit(self):
         self.connection.commit()
