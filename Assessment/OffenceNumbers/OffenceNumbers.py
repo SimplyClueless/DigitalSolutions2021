@@ -7,6 +7,7 @@ from Database import DatabaseManager
 baseDir = os.path.dirname(os.path.abspath(__file__))
 dbPath = os.path.join(baseDir, "crime.db")
 database = DatabaseManager(dbPath)
+imagePath = os.path.join(baseDir, "graph.png")
 
 root = Tk()
 loginWindow = Toplevel(root)
@@ -121,6 +122,8 @@ def DisplayRawData():
 def DisplayGraphData():
     FrameManager()
     graphFrame.pack(padx = 5, pady = 5, expand = True, fill = "both", side = "right")
+    test = PhotoImage(imagePath)
+    image = Label()
 
 def DisplayImportCrime():
     FrameManager()
