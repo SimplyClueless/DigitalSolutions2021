@@ -1,19 +1,28 @@
 import sqlite3
 import os
+import matplotlib
 from tkinter import *
 from tkinter import ttk
 from Database import DatabaseManager
 
+
+# Global Variables
 baseDir = os.path.dirname(os.path.abspath(__file__))
 dbPath = os.path.join(baseDir, "crime.db")
 database = DatabaseManager(dbPath)
 imagePath = os.path.join(baseDir, "graph.png")
 
+# Openable Windows
 root = Tk()
 loginWindow = Toplevel(root)
 registerWindow = Toplevel(root)
+
+# Modifiable frames
 rawFrame = LabelFrame(root, text = "Raw Data")
+rawButtonFrame = Frame(rawFrame)
+tree = ttk.Treeview(rawFrame, column=("c1", "c2", "c3", "c4", "c5"), show="headings")
 graphFrame = LabelFrame(root, text = "Graph Data")
+graphButtonFrame = Frame(graphFrame)
 importFrame = LabelFrame(root, text = "Import Crime")
 officerRegisterFrame = LabelFrame(root, text = "Register Officer")
 
@@ -103,24 +112,54 @@ def FrameManager():
     importFrame.pack_forget()
     officerRegisterFrame.pack_forget()
 
+def DistrictData(district):
+    tree.pack_forget()
+    for item in tree.get_children():
+        tree.delete(item)
+    data = database.ReturnData(district)
+    rows = data.fetchall()
+    for row in rows:
+        tree.insert("", END, values=row)
+    tree.pack(padx = 5, pady = 5, expand = True, fill = "y")
+
 def DisplayRawData():
     FrameManager()
+
+    rawButtonFrame.pack_forget()
+    rawButtonFrame.pack(padx = 5, pady = 5)
+    districtLabel = Label(rawButtonFrame, text = "District: ", font = ("Arial", 15), fg = "black")
+    districtLabel.grid(column = 0, row = 0, padx = 5, pady = 5)
+    districtDropdown = ttk.Combobox(rawButtonFrame)
+    districts = ["All", "Capricornia", "Darling Downs", "Far North", "Gold Coast", "Ipswich", "Logan", "Mackay", "Moreton", "Mount Isa", "North Brisbane", "South Brisbane", "South West", "Sunshine Coast", "Townsville", "Wide Bay Burnett"]
+    districtDropdown['values'] = districts
+    districtDropdown.grid(column = 1, row = 0, padx = 5, pady = 5)
+    displayButton = Button(rawButtonFrame, text = "Display Data", width = 20, height = 4, command = lambda: DistrictData(districtDropdown.get()))
+    displayButton.grid(column = 2, row = 0, padx = 5, pady = 5)
+
     rawFrame.pack(padx = 5, pady = 5, expand = True, fill = "both", side = "right")
-    tree = ttk.Treeview(rawFrame, column=("c1", "c2", "c3", "c4", "c5"), show="headings")
     tree.pack_forget()
     tree.column("#1", anchor=CENTER); tree.heading("#1", text="District")
     tree.column("#2", anchor=CENTER); tree.heading("#2", text="Month & Year")
     tree.column("#3", anchor=CENTER); tree.heading("#3", text="Offences Against Persons")
     tree.column("#4", anchor=CENTER); tree.heading("#4", text="Offences Against Property")
     tree.column("#5", anchor=CENTER); tree.heading("#5", text="Other Offences")
-    data = database.ReturnData()
-    rows = data.fetchall()
-    for row in rows:
-        tree.insert("", END, values=row)
+    DistrictData("all")
     tree.pack(padx = 5, pady = 5, expand = True, fill = "y")
 
 def DisplayGraphData():
     FrameManager()
+
+    graphButtonFrame.pack_forget()
+    graphButtonFrame.pack(padx = 5, pady = 5)
+    districtLabel = Label(graphButtonFrame, text = "District: ", font = ("Arial", 15), fg = "black")
+    districtLabel.grid(column = 0, row = 0, padx = 5, pady = 5)
+    districtDropdown = ttk.Combobox(graphButtonFrame)
+    districts = ["Capricornia", "Darling Downs", "Far North", "Gold Coast", "Ipswich", "Logan", "Mackay", "Moreton", "Mount Isa", "North Brisbane", "South Brisbane", "South West", "Sunshine Coast", "Townsville", "Wide Bay Burnett"]
+    districtDropdown['values'] = districts
+    districtDropdown.grid(column = 1, row = 0, padx = 5, pady = 5)
+    displayButton = Button(graphButtonFrame, text = "Display Data", width = 20, height = 4, command = lambda: DistrictData(districtDropdown.get()))
+    displayButton.grid(column = 2, row = 0, padx = 5, pady = 5)
+
     graphFrame.pack(padx = 5, pady = 5, expand = True, fill = "both", side = "right")
     test = PhotoImage(imagePath)
     image = Label()
@@ -129,39 +168,53 @@ def DisplayImportCrime():
     FrameManager()
     importFrame.pack(padx = 5, pady = 5, expand = True, fill = "both", side = "right")
 
+    districtLabel = Label(importFrame, text = "District: ", font = ("Arial", 15), fg = "black")
+    districtLabel.grid(column = 0, row = 0, padx = 5, pady = 5)
+    districtDropdown = ttk.Combobox(importFrame)
+    districts = ["Capricornia", "Darling Downs", "Far North", "Gold Coast", "Ipswich", "Logan", "Mackay", "Moreton", "Mount Isa", "North Brisbane", "South Brisbane", "South West", "Sunshine Coast", "Townsville", "Wide Bay Burnett"]
+    districtDropdown['values'] = districts
+    districtDropdown.grid(column = 1, row = 0, padx = 5, pady = 5)
+
+    monthLabel = Label(importFrame, text = "Month: ", font = ("Arial", 15), fg = "black")
+    monthLabel.grid(column = 0, row = 1, padx = 5, pady = 5)
+    monthDropdown = ttk.Combobox(importFrame)
+    months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"]
+    monthDropdown['values'] = months
+    monthDropdown.grid(column = 1, row = 1, padx = 5, pady = 5)
+    yearLabel = Label(importFrame, text = "Year: ", font = ("Arial", 15), fg = "black")
+    yearLabel.grid(column = 2, row = 1, padx = 5, pady = 5)
+    yearDropdown = ttk.Combobox(importFrame)
+    years = []
+    for year in range (1900, 2022, 1):
+        years.append(year)
+    years.reverse()
+    yearDropdown['values'] = years
+    yearDropdown.grid(column = 3, row = 1, padx = 5, pady = 5)
+    
+    personsText = Label(importFrame, text = "Offence Against Persons: ", font = ("Arial", 15), fg = "black")
+    personsText.grid(column = 0, row = 2)
+    personsEntry = Entry(importFrame, width = 20)
+    personsEntry.grid(column = 1, row = 2)
+    propertyText = Label(importFrame, text = "Offence Against Property: ", font = ("Arial", 15), fg = "black")
+    propertyText.grid(column = 0, row = 3)
+    propertyEntry = Entry(importFrame, width = 20)
+    propertyEntry.grid(column = 1, row = 3)
+    otherText = Label(importFrame, text = "Other Offences: ", font = ("Arial", 15), fg = "black")
+    otherText.grid(column = 0, row = 4)
+    otherEntry = Entry(importFrame, width = 20)
+    otherEntry.grid(column = 1, row = 4)
+
+    importButton = Button(importFrame, text = "Import Data", width = 20, height = 4, command = lambda: CheckImportData(districtDropdown.get(), monthDropdown.get(), yearDropdown.get(), personsEntry.get(), propertyEntry.get(), otherEntry.get()))
+    importButton.grid(column = 0, row = 5, padx = 5, pady = 5)
+
+def CheckImportData(district, month, year, persons, property, other):
+    monthYear = month[:3] + year[2:]
+    database.ImportCrime(district, monthYear, persons, property, other)
+
 def DisplayRegisterOfficer():
     FrameManager()
     officerRegisterFrame.pack(padx = 5, pady = 5, expand = True, fill = "both", side = "right")
 
-def CheckOfficerRegister(firstName, lastName, email, password, year, month, day, rank, region):
-    dob = year + month[:2] + day
-    database.RegisterOfficer(firstName, lastName, email, password, dob, rank, region)
-
-def MainWindow(userType):
-    root.deiconify()
-    loginWindow.withdraw()
-
-    # Window frame setup
-    navigationFrame = LabelFrame(root, text = "Navigation")
-    navigationFrame.pack(padx = 5, pady = 5, expand = True, fill = "y", anchor = "w", side = "left")
-    DisplayRawData()
-
-    # Navigation Buttons
-    rawButton = Button(navigationFrame, text = "Raw Data", width = 20, height = 4, command = DisplayRawData)
-    rawButton.grid(column = 0, row = 0, padx = 10, pady = 10)
-    graphButton = Button(navigationFrame, text = "Graph Data", width = 20, height = 4, command = DisplayGraphData)
-    graphButton.grid(column = 0, row = 1, padx = 10, pady = 10)
-
-    if (userType == "PoliceLR"):
-        importButton = Button(navigationFrame, text = "Import Crime", width = 20, height = 4, command = DisplayImportCrime)
-        importButton.grid(column = 0, row = 2, padx = 10, pady = 10)
-    elif (userType == "PoliceHR"):
-        importButton = Button(navigationFrame, text = "Import Crime", width = 20, height = 4, command = DisplayImportCrime)
-        importButton.grid(column = 0, row = 2, padx = 10, pady = 10)
-        registerButton = Button(navigationFrame, text = "Register Officer", width = 20, height = 4, command = DisplayRegisterOfficer)
-        registerButton.grid(column = 0, row = 3, padx = 10, pady = 10)
-
-    # Register Officer
     firstNameLabel = Label(officerRegisterFrame, text = "First Name: ", font = ("Arial", 15), fg = "black")
     firstNameLabel.grid(column = 0, row = 0, padx = 5, pady = 5)
     firstNameEntry = Entry(officerRegisterFrame, width = 40)
@@ -225,6 +278,34 @@ def MainWindow(userType):
         command = lambda: CheckOfficerRegister(firstNameEntry.get(), lastNameEntry.get(), emailEntry.get(), passwordEntry.get(), 
         yearDropdown.get(), monthDropdown.get(), dayDropdown.get(), rankDropdown.get(), regionDropdown.get()))
     officerRegisterButton.grid(column = 0, row = 7, padx = 5, pady = 5)
+
+def CheckOfficerRegister(firstName, lastName, email, password, year, month, day, rank, region):
+    dob = year + month[:2] + day
+    database.RegisterOfficer(firstName, lastName, email, password, dob, rank, region)
+
+def MainWindow(userType):
+    root.deiconify()
+    loginWindow.withdraw()
+
+    # Window frame setup
+    navigationFrame = LabelFrame(root, text = "Navigation")
+    navigationFrame.pack(padx = 5, pady = 5, expand = True, fill = "y", anchor = "w", side = "left")
+    DisplayRawData()
+
+    # Navigation Buttons
+    rawButton = Button(navigationFrame, text = "Raw Data", width = 20, height = 4, command = DisplayRawData)
+    rawButton.grid(column = 0, row = 0, padx = 10, pady = 10)
+    graphButton = Button(navigationFrame, text = "Graph Data", width = 20, height = 4, command = DisplayGraphData)
+    graphButton.grid(column = 0, row = 1, padx = 10, pady = 10)
+
+    if (userType == "PoliceLR"):
+        importButton = Button(navigationFrame, text = "Import Crime", width = 20, height = 4, command = DisplayImportCrime)
+        importButton.grid(column = 0, row = 2, padx = 10, pady = 10)
+    elif (userType == "PoliceHR"):
+        importButton = Button(navigationFrame, text = "Import Crime", width = 20, height = 4, command = DisplayImportCrime)
+        importButton.grid(column = 0, row = 2, padx = 10, pady = 10)
+        registerButton = Button(navigationFrame, text = "Register Officer", width = 20, height = 4, command = DisplayRegisterOfficer)
+        registerButton.grid(column = 0, row = 3, padx = 10, pady = 10)
 
 if __name__ == "__main__":
     initialise()
