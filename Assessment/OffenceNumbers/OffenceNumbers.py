@@ -1,6 +1,5 @@
 import sqlite3
 import os
-import matplotlib
 from tkinter import *
 from tkinter import ttk
 from Database import DatabaseManager
